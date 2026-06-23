@@ -3,6 +3,8 @@ from pypdf import PdfReader
 from openai import OpenAI
 from dotenv import load_dotenv
 import os
+import math
+import numpy as np
 
 # here pypdf, openai, dotenv are toolboxes and PdfReader, OpenAi, load_dotenv are the actual tools we are gonna use
 
@@ -37,9 +39,32 @@ def get_embedding(text):
 
 def similarity(vec1,vec2):
     score = 0
-    for i in range(1536):
+
+    for i in range(len(vec1)):
         score += abs(vec1[i]-vec2[i])
     return score
+
+# def cosine_similarity(vec1,vec2):
+#     dot_product = 0
+#     norm1 = 0
+#     norm2 = 0
+
+#     for i in range(len(vec1)):
+#         dot_product += vec1[i] * vec2[i]
+#         norm1 += vec1[i] * vec1[i]
+#         norm2 += vec2[i] * vec2[i]
+
+#     return dot_product /(
+#         math.sqrt(norm1) + math.sqrt(norm2)
+#     )    
+
+def cosine_similarity(vec1,vec2):
+    v1 = np.array(vec1)
+    v2 = np.array(vec2)
+
+    return np.dot(v1,v2)/(
+        np.linalg.norm(v1) * np.linalg.norm(v2)
+    )
 
 if uploaded_file:
     reader = PdfReader(uploaded_file)
@@ -50,7 +75,7 @@ if uploaded_file:
 
     # print(len(all_text))    
 
-    chunks = create_chunks(all_text,200)    
+    chunks = create_chunks(all_text,500)    
     if "data" not in st.session_state or st.session_state.pdf_text!=all_text:
         data = []
         # st.write(len(chunks))
@@ -78,14 +103,24 @@ if uploaded_file:
     #         best_score = score
     #         best_chunk = chunk["text"]
 
+    # best_chunk = ""
+    # storage = []
+    # data = st.session_state.data
+    # for chunk in data:
+    #     score = similarity(chunk["embedding"],question_embedding)
+    #     storage.append((score,chunk["text"]))
+
+    # storage.sort()
+
     best_chunk = ""
     storage = []
     data = st.session_state.data
+
     for chunk in data:
-        score = similarity(chunk["embedding"],question_embedding)
+        score = cosine_similarity(chunk["embedding"],question_embedding)
         storage.append((score,chunk["text"]))
 
-    storage.sort()
+    storage.sort(reverse=True)
     top_3 = storage[:3]
     for x in top_3:
         best_chunk += x[1]
@@ -113,40 +148,3 @@ if uploaded_file:
             input=prompt
         )   
         st.write(response.output_text)
-
-
-
-
-
-# chunks = create_chunks(all_text,1000)
-# print(len(chunks))
-
-# response = client.embeddings.create(
-#     model="text-embedding-3-small",
-#     input="I love programming"
-# )
-
-# print(type(response))
-# print(len(response.data[0].embedding))
-# print(response.data[0].embedding[:10])
-
-
-# best_score = 1000
-# best_chunk = ""
-# question_embedding =  100
-# for chunk in data:
-#     if abs(chunk["embedding"]-question_embedding)<best_score:
-#         best_score = abs(chunk["embedding"]-question_embedding)
-#         best_chunk = chunk["text"]
-# abs(chunk["embedding"]-question_embedding) signifies best chunk score         
-
-# response = client.response.create(
-#     model ="gpt",
-#     input = prompt
-# )   
-
-#  Document:
-#  {all_text}
-
-
- 
