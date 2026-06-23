@@ -1,0 +1,4 @@
+steamlit
+openai
+python-dotenv
+pypdf
