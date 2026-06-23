@@ -1,6 +1,6 @@
 # Chat with PDF
 
-Live project link - [https://ai-chat-bot-1.streamlit.app/](https://chat-with-pdf1.streamlit.app/)
+Live project link - https://chat-with-pdf1.streamlit.app/
 
 A Retrieval-Augmented Generation (RAG) application built with Streamlit and OpenAI.
 
